@@ -3,7 +3,7 @@ cs50==6.0.3
 Flask==1.1.2
 itsdangerous==1.1.0
 Jinja2==2.11.3
-joblib==1.0.1
+joblib==1.2.0
 MarkupSafe==1.1.1
 nltk==3.6.5
 regex
