@@ -5,4 +5,4 @@ Run the following commands in terminal to run the app :-
 3. pip3 install -r requirements.txt
 4. flask run
 
-# link to demo: https://comparartexto.herokuapp.com/
+# link to demo: [https://comparar-texto.onrender.com/]
