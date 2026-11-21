@@ -1,38 +1,28 @@
+import re
+
+_SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+
+
+def lines(a, b):
+    """Return lines in both a and b"""
+    return list(set(a.splitlines()) & set(b.splitlines()))
+
+
+def sentences(a, b):
+    """Return sentences in both a and b"""
+
+    def split(text):
+        return {s.strip() for s in _SENTENCE_END.split(text) if s.strip()}
+
+    return list(split(a) & split(b))
+
 
 def substrings(a, b, n):
     """Return substrings of length n in both a and b"""
+    if n <= 0:
+        return []
 
-    sub = ""
-    matches = []
+    def subs(text):
+        return {text[i:i + n] for i in range(len(text) - n + 1)}
 
-    # create a list of the a substrings.
-    i = 0
-    j = n
-    aList = []
-
-    # create a list of all possible substring of n length in a
-    while(j <= len(a) + 1):
-
-        sub = a[i:j]
-
-        aList.append(sub)
-
-        i += 1
-        j += 1
-
-    # Check each b substring to see if it is also an a substring.
-    i = 0
-    j = n
-
-    while(j <= len(b) + 1):
-
-        sub = b[i:j]
-
-        if sub not in matches and sub in aList and len(sub) == n:
-
-            matches.append(sub)
-
-        i += 1
-        j += 1
-
-    return matches
+    return list(subs(a) & subs(b))
