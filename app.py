@@ -1,9 +1,9 @@
 import re
 from flask import Flask, abort, redirect, render_template, request
 from html import escape
-from werkzeug.exceptions import default_exceptions, HTTPException
+from werkzeug.exceptions import HTTPException
 
-from helpers import substrings
+from helpers import lines, sentences, substrings
 
 # Configure application
 app = Flask(__name__)
@@ -32,7 +32,7 @@ def compare():
     """Handle requests for /compare via POST"""
 
     # Read files
-    if not request.files["file1"] or not request.files["file2"]:
+    if not request.files.get("file1") or not request.files.get("file2"):
         abort(400, "missing file")
     try:
         file1 = request.files["file1"].read().decode("utf-8")
@@ -41,15 +41,21 @@ def compare():
         abort(400, "invalid file")
 
     # Compare files
-    if not request.form.get("algorithm"):
+    algorithm = request.form.get("algorithm")
+    if not algorithm:
         abort(400, "missing algorithm")
-    elif request.form.get("algorithm") == "substrings":
-        if not request.form.get("length"):
-            abort(400, "missing length")
-        elif not int(request.form.get("length")) > 0:
+    elif algorithm == "lines":
+        regexes = [f"^{re.escape(match)}$" for match in lines(file1, file2)]
+    elif algorithm == "sentences":
+        regexes = [re.escape(match) for match in sentences(file1, file2)]
+    elif algorithm == "substrings":
+        try:
+            length = int(request.form.get("length", ""))
+        except ValueError:
             abort(400, "invalid length")
-        regexes = [re.escape(match) for match in substrings(
-            file1, file2, int(request.form.get("length")))]
+        if length <= 0:
+            abort(400, "invalid length")
+        regexes = [re.escape(match) for match in substrings(file1, file2, length)]
     else:
         abort(400, "invalid algorithm")
 
@@ -131,9 +137,5 @@ def errorhandler(error):
     return render_template("error.html", error=error), error.code
 
 
-# https://github.com/pallets/flask/pull/2314
-for code in default_exceptions:
-    app.errorhandler(code)(errorhandler)
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
